@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clinton Family Chore Tracker</title>
+
+<style>
+:root{
+  --dad:#2563eb; --mom:#db2777; --tariq:#d97706; --khari:#059669; --naila:#9333ea;
+  --bg:#f6f5f1; --card:#ffffff; --ink:#27241f; --muted:#7a766e; --line:#e7e3da;
+  --accent:#3f6b4f; --accent-light:#e8f0ea; --gold:#f4b942;
+  --good:#3f6b4f; --warn:#d97706; --bad:#c0392b; --radius:14px;
+}
+*{box-sizing:border-box;}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);}
+header{background:linear-gradient(135deg,#3f6b4f,#2d4f3a);color:#fff;padding:18px 24px;box-shadow:0 2px 10px rgba(0,0,0,.12);}
+header h1{margin:0;font-size:1.4rem;display:flex;align-items:center;gap:10px;}
+header p{margin:4px 0 0;opacity:.85;font-size:.85rem;}
+.top-row{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:10px;}
+.actions{display:flex;gap:8px;flex-wrap:wrap;}
+.hidden{display:none !important;}
+nav#personTabs{display:flex;flex-wrap:wrap;gap:4px;background:#2d4f3a;padding:0 16px;position:sticky;top:0;z-index:50;overflow-x:auto;}
+nav#personTabs button{background:transparent;border:none;color:#cfe0d3;padding:11px 14px;cursor:pointer;font-size:.84rem;font-weight:600;display:flex;align-items:center;gap:6px;border-bottom:3px solid transparent;white-space:nowrap;}
+nav#personTabs button:hover{color:#fff;}
+nav#personTabs button.active{color:#fff;border-bottom-color:var(--gold);}
+.people-bar{display:flex;gap:8px;padding:12px 16px 4px;flex-wrap:wrap;align-items:center;background:var(--bg);}
+.chip{display:flex;align-items:center;gap:6px;border:2px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px 6px 8px;font-size:.82rem;font-weight:600;cursor:pointer;color:var(--muted);}
+.chip .dot{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem;background:#eee;}
+.chip.active{border-color:var(--c);color:var(--ink);box-shadow:0 0 0 2px var(--c) inset;}
+main{max-width:1100px;margin:0 auto;padding:20px;}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.card h2{margin:0 0 12px;font-size:1.05rem;display:flex;align-items:center;gap:8px;color:var(--ink);}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.btn{background:var(--gold);color:#3a2c00;border:none;padding:8px 14px;border-radius:10px;cursor:pointer;font-size:.82rem;font-weight:700;transition:.15s;}
+.btn:hover{transform:translateY(-1px);box-shadow:0 3px 8px rgba(0,0,0,.15);}
+.btn.secondary{background:var(--accent-light);color:var(--accent);}
+.btn.danger{background:#fde2e2;color:var(--bad);}
+.btn.small{padding:5px 9px;font-size:.74rem;border-radius:8px;}
+.btn.ghost{background:rgba(255,255,255,.15);color:#fff;}
+.btn.ghost:hover{background:rgba(255,255,255,.25);}
+.pill{display:inline-block;padding:4px 10px;border-radius:999px;font-size:.78rem;font-weight:700;background:var(--accent-light);color:var(--accent);}
+.dateNav{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+.dateNav input[type=date]{padding:6px 8px;border:1px solid var(--line);border-radius:8px;font-size:.82rem;}
+ul.chorelist{list-style:none;margin:0;padding:0;}
+ul.chorelist li{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--line);}
+ul.chorelist li:last-child{border-bottom:none;}
+ul.chorelist li .icon{font-size:1.15rem;width:24px;text-align:center;}
+ul.chorelist li .name{flex:1;font-size:.9rem;}
+ul.chorelist li .name small{display:block;color:var(--muted);font-size:.72rem;}
+ul.chorelist li input[type=checkbox]{width:19px;height:19px;accent-color:var(--accent);cursor:pointer;}
+.progressWrap{background:#eee;border-radius:999px;height:10px;overflow:hidden;flex:1;min-width:120px;}
+.progressBar{height:100%;border-radius:999px;background:var(--accent);}
+table.grid{width:100%;border-collapse:collapse;font-size:.78rem;}
+table.grid th,table.grid td{border:1px solid var(--line);padding:6px 5px;text-align:center;vertical-align:top;}
+table.grid th{background:#faf9f5;font-weight:700;}
+table.grid td.chorecell{text-align:left;font-weight:600;background:#fafbfc;}
+table.grid td.hit{background:var(--accent-light);}
+table.grid input[type=checkbox]{width:17px;height:17px;accent-color:var(--accent);cursor:pointer;}
+.modalOverlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:100;padding:16px;}
+.modalOverlay.show{display:flex;}
+.modal{background:#fff;border-radius:16px;padding:22px;width:min(480px,92vw);max-height:88vh;overflow:auto;}
+.modal h3{margin-top:0;}
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:.78rem;font-weight:700;color:var(--muted);margin-bottom:4px;}
+.field input,.field select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:.88rem;}
+.tag-dog{color:var(--dad);}
+.tag-household{color:var(--accent);}
+.tag-custom{color:var(--warn);}
+.overviewGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;}
+.personMini{border:1px solid var(--line);border-radius:12px;padding:12px;}
+.personMini h4{margin:0 0 6px;display:flex;align-items:center;gap:6px;}
+footer{text-align:center;color:var(--muted);font-size:.78rem;padding:20px;}
+.removeBtn{background:none;border:none;color:var(--bad);cursor:pointer;font-size:1rem;line-height:1;}
+.subtabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.subtabs button{background:var(--accent-light);border:none;padding:7px 12px;border-radius:8px;cursor:pointer;font-size:.82rem;font-weight:600;color:var(--accent);}
+.subtabs button.active{background:var(--accent);color:#fff;}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#2d4f3a;color:#fff;padding:10px 18px;border-radius:999px;font-size:.85rem;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.25);z-index:200;opacity:0;transition:opacity .25s;pointer-events:none;}
+.toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<header>
+  <div class="top-row">
+    <div>
+      <h1>🏠 Clinton Family Chore Tracker</h1>
+      <p>Dog Chore Chart + Household Chore Chart, combined · daily checklists roll up into weekly scorecards</p>
+    </div>
+    <div class="actions">
+      <span class="btn ghost" id="syncStatus" style="cursor:default">⏳ Connecting…</span>
+      <button class="btn" id="btnAdd">+ Add Chore</button>
+      <button class="btn ghost" id="btnEmail">✉️ Email Report</button>
+      <button class="btn ghost" id="btnPptx">📊 Export PPTX</button>
+      <button class="btn ghost" id="btnSettings">⚙️ Settings</button>
+      <button class="btn ghost" id="btnBackup">💾 Backup</button>
+      <button class="btn ghost" id="btnRestore">📂 Restore</button>
+      <input type="file" id="restoreFile" accept=".json" class="hidden">
+    </div>
+  </div>
+</header>
+<nav id="personTabs"></nav>
+<div class="people-bar" id="peopleBar"></div>
+<main id="app"></main>
+<footer>Built from Dog Chore Chart.pptx + Clinton Family Chore Chart.docx · Synced for the whole family</footer>
+
+<div class="modalOverlay" id="addEntryModal">
+  <div class="modal">
+    <h3 id="ae-title">+ Add Chore</h3>
+    <div class="field"><label>Person</label>
+      <select id="ae-person"></select>
+    </div>
+    <div class="field"><label>Chore / Task name</label><input id="ae-name" type="text" placeholder="e.g. Pack lunch"></div>
+    <div class="field"><label>Icon (emoji, optional)</label><input id="ae-icon" type="text" placeholder="📝" maxlength="4"></div>
+    <div class="field"><label>Date</label><input id="ae-date" type="date"></div>
+    <div class="field"><label>Time (optional)</label><input id="ae-time" type="time"></div>
+    <div class="row">
+      <button class="btn" id="ae-save">Add Chore</button>
+      <button class="btn secondary" id="ae-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="modalOverlay" id="settingsModal">
+  <div class="modal" style="width:min(560px,92vw)">
+    <h3>⚙️ Rotation Settings</h3>
+    <p style="font-size:12.5px;color:var(--muted)">These anchors default to assumptions documented when this tracker was built. Adjust if they don't match reality, then Save.</p>
+    <div id="settingsForm"></div>
+    <div class="row">
+      <button class="btn" id="settings-save">Save</button>
+      <button class="btn secondary" id="settings-reset">Reset to Defaults</button>
+      <button class="btn secondary" id="settings-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================== DATA MODEL =========================== */
+
+const PEOPLE = [
+  {id:'dad', name:'Dad', icon:'👨'},
+  {id:'mom', name:'Mom', icon:'👩'},
+  {id:'tariq', name:'Tariq', icon:'👦'},
+  {id:'khari', name:'Khari', icon:'👧'},
+  {id:'naila', name:'Naila', icon:'🧒'}
+];
+const PERSON_COLOR = {dad:'var(--dad)',mom:'var(--mom)',tariq:'var(--tariq)',khari:'var(--khari)',naila:'var(--naila)'};
+const DAY_LABELS = ["SUN","MON","TUE","WED","THU","FRI","SAT"];
+const DAY_LABELS_LONG = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+const DOG_WEEK_ANCHOR = "2026-06-21"; // Sunday => Dog Week 4, per explicit user instruction
+const DOG_WEEK_ANCHOR_NUMBER = 4;
+
+const DOG_CHORE_ICONS = {
+  "Morning Feeding":"🍽️","Evening Feeding":"🍽️","Fresh Water As needed":"💧",
+  "Morning Walk":"🚶","Afternoon Walk":"🚶","Evening Walk":"🌙",
+  "Poop Cleanup (Yard) 6:00 PM":"💩","Playtime / Exercise":"🎾","Training Practice":"🐾",
+  "Brush / Grooming":"🪥","Clean Food / Water Bowls":"🧽","Bathtime Sat AM":"🛁"
+};
+
+const DOG_CHART = {
+"WEEK 1": [
+{"chore":"Morning Feeding","assignments":{"SUN":"Dad","MON":"Mom","TUE":"Naila","WED":"Khari","THU":"Tariq","FRI":"Dad","SAT":"Mom"}},
+{"chore":"Evening Feeding","assignments":{"SUN":"Mom","MON":"Naila","TUE":"Khari","WED":"Tariq","THU":"Dad","FRI":"Mom","SAT":"Naila"}},
+{"chore":"Fresh Water As needed","assignments":{"SUN":"Naila","MON":"Khari","TUE":"Tariq","WED":"Dad","THU":"Mom","FRI":"Naila","SAT":"Khari"}},
+{"chore":"Morning Walk","assignments":{"SUN":"Khari","MON":"Tariq","TUE":"Dad","WED":"Mom","THU":"Naila","FRI":"Khari","SAT":"Tariq"}},
+{"chore":"Afternoon Walk","assignments":{"SUN":"Tariq","MON":"Dad","TUE":"Mom","WED":"Naila","THU":"Khari","FRI":"Tariq","SAT":"Dad"}},
+{"chore":"Evening Walk","assignments":{"SUN":"Dad","MON":"Mom","TUE":"Naila","WED":"Khari","THU":"Tariq","FRI":"Dad","SAT":"Mom"}},
+{"chore":"Poop Cleanup (Yard) 6:00 PM","assignments":{"SUN":"Mom","MON":"Naila","TUE":"Khari","WED":"Tariq","THU":"Dad","FRI":"Mom","SAT":"Naila"}},
+{"chore":"Playtime / Exercise","assignments":{"SUN":"Naila","MON":"Khari","TUE":"Tariq","WED":"Dad","THU":"Mom","FRI":"Naila","SAT":"Khari"}},
+{"chore":"Training Practice","assignments":{"SUN":"Khari","MON":"Tariq","TUE":"Dad","WED":"Mom","THU":"Naila","FRI":"Khari","SAT":"Tariq"}},
+{"chore":"Brush / Grooming","assignments":{"SUN":"Dad","MON":"—","TUE":"Naila","WED":"—","THU":"Tariq","FRI":"—","SAT":"Mom"}},
+{"chore":"Clean Food / Water Bowls","assignments":{"SUN":"—","MON":"Naila","TUE":"—","WED":"Tariq","THU":"—","FRI":"Mom","SAT":"—"}},
+{"chore":"Bathtime Sat AM","assignments":{"SUN":"—","MON":"—","TUE":"—","WED":"—","THU":"—","FRI":"—","SAT":"Tariq"}}
+],
+"WEEK 2": [
+{"chore":"Morning Feeding","assignments":{"SUN":"Naila","MON":"Khari","TUE":"Tariq","WED":"Dad","THU":"Mom","FRI":"Naila","SAT":"Khari"}},
+{"chore":"Evening Feeding","assignments":{"SUN":"Khari","MON":"Tariq","TUE":"Dad","WED":"Mom","THU":"Naila","FRI":"Khari","SAT":"Tariq"}},
+{"chore":"Fresh Water As needed","assignments":{"SUN":"Tariq","MON":"Dad","TUE":"Mom","WED":"Naila","THU":"Khari","FRI":"Tariq","SAT":"Dad"}},
+{"chore":"Morning Walk","assignments":{"SUN":"Dad","MON":"Mom","TUE":"Naila","WED":"Khari","THU":"Tariq","FRI":"Dad","SAT":"Mom"}},
+{"chore":"Afternoon Walk","assignments":{"SUN":"Mom","MON":"Naila","TUE":"Khari","WED":"Tariq","THU":"Dad","FRI":"Mom","SAT":"Naila"}},
+{"chore":"Evening Walk","assignments":{"SUN":"Naila","MON":"Khari","TUE":"Tariq","WED":"Dad","THU":"Mom","FRI":"Naila","SAT":"Khari"}},
+{"chore":"Poop Cleanup (Yard) 6:00 PM","assignments":{"SUN":"Khari","MON":"Tariq","TUE":"Dad","WED":"Mom","THU":"Naila","FRI":"Khari","SAT":"Tariq"}},
+{"chore":"Playtime / Exercise","assignments":{"SUN":"Tariq","MON":"Dad","TUE":"Mom","WED":"Naila","THU":"Khari","FRI":"Tariq","SAT":"Dad"}},
+{"chore":"Training Practice","assignments":{"SUN":"Dad","MON":"Mom","TUE":"Naila","WED":"Khari","THU":"Tariq","FRI":"Dad","SAT":"Mom"}},
+{"chore":"Brush / Grooming","assignments":{"SUN":"—","MON":"Khari","TUE":"—","WED":"Dad","THU":"—","FRI":"Naila","SAT":"—"}},
+{"chore":"Clean Food / Water Bowls","assignments":{"SUN":"Khari","MON":"—","TUE":"Dad","WED":"—","THU":"Naila","FRI":"—","SAT":"Tariq"}},
+{"chore":"Bathtime Sat AM","assignments":{"SUN":"—","MON":"—","TUE":"—","WED":"—","THU":"—","FRI":"—","SAT":"Mom"}}
+],
+"WEEK 3": [
+{"chore":"Morning Feeding","assignments":{"SUN":"Tariq","MON":"Dad","TUE":"Mom","WED":"Naila","THU":"Khari","FRI":"Tariq","SAT":"Dad"}},
+{"chore":"Evening Feeding","assignments":{"SUN":"Dad","MON":"Mom","TUE":"Naila","WED":"Khari","THU":"Tariq","FRI":"Dad","SAT":"Mom"}},
+{"chore":"Fresh Water As needed","assignments":{"SUN":"Mom","MON":"Naila","TUE":"Khari","WED":"Tariq","THU":"Dad","FRI":"Mom","SAT":"Naila"}},
+{"chore":"Morning Walk","assignments":{"SUN":"Naila","MON":"Khari","TUE":"Tariq","WED":"Dad","THU":"Mom","FRI":"Naila","SAT":"Khari"}},
+{"chore":"Afternoon Walk","assignments":{"SUN":"Khari","MON":"Tariq","TUE":"Dad","WED":"Mom","THU":"Naila","FRI":"Khari","SAT":"Tariq"}},
+{"chore":"Evening Walk","assignments":{"SUN":"Tariq","MON":"Dad","TUE":"Mom","WED":"Naila","THU":"Khari","FRI":"Tariq","SAT":"Dad"}},
+{"chore":"Poop Cleanup (Yard) 6:00 PM","assignments":{"SUN":"Dad","MON":"Mom","TUE":"Naila","WED":"Khari","THU":"Tariq","FRI":"Dad","SAT":"Mom"}},
+{"chore":"Playtime / Exercise","assignments":{"SUN":"Mom","MON":"Naila","TUE":"Khari","WED":"Tariq","THU":"Dad","FRI":"Mom","SAT":"Naila"}},
+{"chore":"Training Practice","assignments":{"SUN":"Naila","MON":"Khari","TUE":"Tariq","WED":"Dad","THU":"Mom","FRI":"Naila","SAT":"Khari"}},
+{"chore":"Brush / Grooming","assignments":{"SUN":"Tariq","MON":"—","TUE":"Mom","WED":"—","THU":"Khari","FRI":"—","SAT":"Dad"}},
+{"chore":"Clean Food / Water Bowls","assignments":{"SUN":"—","MON":"Mom","TUE":"—","WED":"Khari","THU":"—","FRI":"Dad","SAT":"—"}},
+{"chore":"Bathtime Sat AM","assignments":{"SUN":"—","MON":"—","TUE":"—","WED":"—","THU":"—","FRI":"—","SAT":"Khari"}}
+],
+"WEEK 4": [
+{"chore":"Morning Feeding","assignments":{"SUN":"Mom","MON":"Naila","TUE":"Khari","WED":"Tariq","THU":"Dad","FRI":"Mom","SAT":"Naila"}},
+{"chore":"Evening Feeding","assignments":{"SUN":"Naila","MON":"Khari","TUE":"Tariq","WED":"Dad","THU":"Mom","FRI":"Naila","SAT":"Khari"}},
+{"chore":"Fresh Water As needed","assignments":{"SUN":"Khari","MON":"Tariq","TUE":"Dad","WED":"Mom","THU":"Naila","FRI":"Khari","SAT":"Tariq"}},
+{"chore":"Morning Walk","assignments":{"SUN":"Tariq","MON":"Dad","TUE":"Mom","WED":"Naila","THU":"Khari","FRI":"Tariq","SAT":"Dad"}},
+{"chore":"Afternoon Walk","assignments":{"SUN":"Dad","MON":"Mom","TUE":"Naila","WED":"Khari","THU":"Tariq","FRI":"Dad","SAT":"Mom"}},
+{"chore":"Evening Walk","assignments":{"SUN":"Mom","MON":"Naila","TUE":"Khari","WED":"Tariq","THU":"Dad","FRI":"Mom","SAT":"Naila"}},
+{"chore":"Poop Cleanup (Yard) 6:00 PM","assignments":{"SUN":"Naila","MON":"Khari","TUE":"Tariq","WED":"Dad","THU":"Mom","FRI":"Naila","SAT":"Khari"}},
+{"chore":"Playtime / Exercise","assignments":{"SUN":"Khari","MON":"Tariq","TUE":"Dad","WED":"Mom","THU":"Naila","FRI":"Khari","SAT":"Tariq"}},
+{"chore":"Training Practice","assignments":{"SUN":"Tariq","MON":"Dad","TUE":"Mom","WED":"Naila","THU":"Khari","FRI":"Tariq","SAT":"Dad"}},
+{"chore":"Brush / Grooming","assignments":{"SUN":"—","MON":"Naila","TUE":"—","WED":"Tariq","THU":"—","FRI":"Mom","SAT":"—"}},
+{"chore":"Clean Food / Water Bowls","assignments":{"SUN":"Naila","MON":"—","TUE":"Tariq","WED":"—","THU":"Mom","FRI":"—","SAT":"Khari"}},
+{"chore":"Bathtime Sat AM","assignments":{"SUN":"—","MON":"—","TUE":"—","WED":"—","THU":"—","FRI":"—","SAT":"Dad"}}
+]
+};
+
+const HOMEWORK_START = "2026-08-24";
+const HOMEWORK_END = "2027-06-02";
+const HOMEWORK_EXCLUDED_RANGES = [
+  ["2026-09-04","2026-09-07"],
+  ["2026-09-21","2026-09-21"],
+  ["2026-11-03","2026-11-03"],
+  ["2026-11-25","2026-11-27"],
+  ["2026-12-21","2027-01-01"],
+  ["2027-01-18","2027-01-18"],
+  ["2027-02-15","2027-02-19"],
+  ["2027-03-26","2027-04-02"],
+  ["2027-05-31","2027-05-31"],
+  ["2027-06-03","2027-06-03"]
+];
+
+const BATHROOM_ROTATION = {
+  1: {khari:'Upstairs Bathroom', naila:'Downstairs Bathroom', tariq:'Off'},
+  2: {khari:'Off', naila:'Upstairs Bathroom', tariq:'Downstairs Bathroom'},
+  3: {khari:'Downstairs Bathroom', naila:'Off', tariq:'Upstairs Bathroom'}
+};
+
+const DEFAULT_SETTINGS = {
+  dogWeekOverride: null,
+  bathroomAnchorDate: "2026-06-21", bathroomAnchorWeek: 1,
+  floorAnchorDate: "2026-06-21", floorAnchorWeek: "A",
+  curbAnchorDate: "2026-06-21", curbAnchorPerson: "tariq",
+  blindsAnchorDate: "2026-06-21", blindsAnchorPerson: "khari",
+  sweepAnchorDate: "2026-06-21", sweepAnchorPerson: "naila",
+  vacuumAnchorDate: "2026-06-21", vacuumAnchorPerson: "khari",
+  linensAnchorDate: "2026-06-21", linensAnchorOnWeek: true
+};
+
+const HOUSEHOLD_CHORES = {
+  tariq: [
+    {id:'t-trash', name:'Check Trash & Recyclables', icon:'🗑️', freq:'daily'},
+    {id:'t-curb', name:'Collect Trash & Recyclables to Curb', icon:'🚮', freq:'curb-rotation', detail:'Tuesday evening · rotates weekly w/ Khari & Naila'},
+    {id:'t-bathroom', name:'Clean Bathrooms', icon:'🚽', freq:'bathroom-rotation'},
+    {id:'t-deepclean', name:'Deep Clean Bedroom', icon:'🧼', freq:'weekly'},
+    {id:'t-linens', name:'Wash Linen', icon:'🛌', freq:'every-other-week'}
+  ],
+  khari: [
+    {id:'k-khan', name:'Khan Academy (Math Skills)', icon:'📚', freq:'khan', detail:'30 min/day · Mon–Fri · paused Aug 24 – Jun 3 (school year)'},
+    {id:'k-sax', name:'Saxophone Practice', icon:'🎷', freq:'weekday', detail:'15 min/day · Mon–Fri'},
+    {id:'k-bed', name:'Make Bed', icon:'🛏️', freq:'daily'},
+    {id:'k-sweep', name:'Sweep Floor', icon:'🧹', freq:'sweep-rotation', detail:'Every other day · alternates w/ Naila'},
+    {id:'k-dishes', name:'Put Away Dishes', icon:'🍽️', freq:'daily'},
+    {id:'k-room', name:'Clean Up / Pick Up Room', icon:'🧸', freq:'daily'},
+    {id:'k-blinds', name:'Close Blinds', icon:'🪟', freq:'blinds-rotation', detail:'Every other day · alternates w/ Naila'},
+    {id:'k-vacuum', name:'Vacuum Floor', icon:'🧹', freq:'vacuum-rotation', detail:'Every other day · alternates w/ Naila'},
+    {id:'k-laundry', name:'Laundry', icon:'👕', freq:'weekly'},
+    {id:'k-dust', name:'Dust – Rest of House', icon:'🪶', freq:'floor-dust-whenB', detail:'Alternates w/ Naila weekly'},
+    {id:'k-mop', name:'Mop Floors', icon:'🧽', freq:'floor-mop-whenA', detail:'Alternates w/ Naila weekly'},
+    {id:'k-deepclean', name:'Deep Clean Room', icon:'🧼', freq:'weekly'},
+    {id:'k-bathroom', name:'Clean Bathrooms', icon:'🚽', freq:'bathroom-rotation'},
+    {id:'k-linens', name:'Wash Linens', icon:'🛌', freq:'every-other-week'},
+    {id:'k-curb', name:'Collect Trash & Recyclables to Curb', icon:'🚮', freq:'curb-rotation', detail:'Tuesday evening · rotates weekly w/ Tariq & Naila'},
+    {id:'k-homework', name:'Homework Time', icon:'📖', freq:'homework', detail:'Mon–Fri, Aug 24 – Jun 2 (school year)'}
+  ],
+  naila: [
+    {id:'n-skinam', name:'Skin Care Routine – Morning', icon:'☀️', freq:'daily'},
+    {id:'n-skinpm', name:'Skin Care Routine – Bedtime', icon:'🌙', freq:'daily'},
+    {id:'n-med', name:'Take Medication', icon:'💊', freq:'daily', detail:'Bedtime'},
+    {id:'n-bed', name:'Make Bed', icon:'🛏️', freq:'daily'},
+    {id:'n-sweep', name:'Sweep Floor', icon:'🧹', freq:'sweep-rotation', detail:'Every other day · alternates w/ Khari'},
+    {id:'n-dishes', name:'Put Away Dishes', icon:'🍽️', freq:'daily'},
+    {id:'n-room', name:'Clean Up / Pick Up Room', icon:'🧸', freq:'daily'},
+    {id:'n-blinds', name:'Close Blinds', icon:'🪟', freq:'blinds-rotation', detail:'Every other day · alternates w/ Khari'},
+    {id:'n-vacuum', name:'Vacuum Floor', icon:'🧹', freq:'vacuum-rotation', detail:'Every other day · alternates w/ Khari'},
+    {id:'n-khan', name:'Khan Academy (Math Skills)', icon:'📚', freq:'khan', detail:'30 min/day · Mon–Fri · paused Aug 24 – Jun 3 (school year)'},
+    {id:'n-laundry', name:'Laundry', icon:'👕', freq:'weekly'},
+    {id:'n-dust', name:'Dust – Rest of House', icon:'🪶', freq:'floor-dust-whenA', detail:'Alternates w/ Khari weekly'},
+    {id:'n-mop', name:'Mop Floors', icon:'🧽', freq:'floor-mop-whenB', detail:'Alternates w/ Khari weekly'},
+    {id:'n-deepclean', name:'Deep Clean Room', icon:'🧼', freq:'weekly'},
+    {id:'n-bathroom', name:'Clean Bathrooms', icon:'🚽', freq:'bathroom-rotation'},
+    {id:'n-linens', name:'Wash Linens', icon:'🛌', freq:'every-other-week'},
+    {id:'n-curb', name:'Collect Trash & Recyclables to Curb', icon:'🚮', freq:'curb-rotation', detail:'Tuesday evening · rotates weekly w/ Tariq & Khari'},
+    {id:'n-homework', name:'Homework Time', icon:'📖', freq:'homework', detail:'Mon–Fri, Aug 24 – Jun 2 (school year)'}
+  ]
+};
+
+/* =========================== DATE UTILITIES =========================== */
+function dateFromISO(iso){ const [y,m,d]=iso.split('-').map(Number); return new Date(Date.UTC(y,m-1,d)); }
+function isoFromDate(d){ return d.toISOString().slice(0,10); }
+function addDays(iso,n){ const d=dateFromISO(iso); d.setUTCDate(d.getUTCDate()+n); return isoFromDate(d); }
+function dayOfWeek(iso){ return dateFromISO(iso).getUTCDay(); }
+function diffDays(isoA,isoB){ return Math.round((dateFromISO(isoB)-dateFromISO(isoA))/86400000); }
+function startOfWeek(iso){ return addDays(iso, -dayOfWeek(iso)); }
+function todayISO(){ const n=new Date(); return isoFromDate(new Date(Date.UTC(n.getFullYear(),n.getMonth(),n.getDate()))); }
+function formatLong(iso){ const d=dateFromISO(iso); return DAY_LABELS_LONG[d.getUTCDay()]+", "+d.toLocaleDateString('en-US',{timeZone:'UTC',month:'long',day:'numeric',year:'numeric'}); }
+function formatShort(iso){ const d=dateFromISO(iso); return d.toLocaleDateString('en-US',{timeZone:'UTC',month:'short',day:'numeric'}); }
+
+/* =========================== ROTATION ENGINE =========================== */
+function getDogWeekNumber(iso, settings){
+  if(settings && settings.dogWeekOverride) return settings.dogWeekOverride;
+  const weekStart = startOfWeek(iso);
+  const anchorStart = startOfWeek(DOG_WEEK_ANCHOR);
+  const diffWeeks = Math.round(diffDays(anchorStart, weekStart)/7);
+  const n = ((diffWeeks % 4) + 4) % 4;
+  const map = [4,1,2,3];
+  return map[n];
+}
+function rotationValue(iso, anchorISO, anchorValueIndex, cycleLen){
+  const diffWeeks = Math.round(diffDays(startOfWeek(anchorISO), startOfWeek(iso))/7);
+  return (((anchorValueIndex + diffWeeks) % cycleLen) + cycleLen) % cycleLen;
+}
+function getBathroomWeek(iso, settings){
+  return rotationValue(iso, settings.bathroomAnchorDate, settings.bathroomAnchorWeek-1, 3) + 1;
+}
+function getFloorWeek(iso, settings){
+  return ['A','B'][ rotationValue(iso, settings.floorAnchorDate, settings.floorAnchorWeek==='A'?0:1, 2) ];
+}
+function getCurbPerson(iso, settings){
+  const order = ['tariq','khari','naila'];
+  return order[ rotationValue(iso, settings.curbAnchorDate, order.indexOf(settings.curbAnchorPerson), 3) ];
+}
+function getBlindsPerson(iso, settings){
+  const d = ((diffDays(settings.blindsAnchorDate, iso) % 2) + 2) % 2;
+  const anchorPerson = settings.blindsAnchorPerson;
+  const otherPerson = anchorPerson==='khari' ? 'naila' : 'khari';
+  return d===0 ? anchorPerson : otherPerson;
+}
+function getSweepPerson(iso, settings){
+  const d = ((diffDays(settings.sweepAnchorDate, iso) % 2) + 2) % 2;
+  const anchorPerson = settings.sweepAnchorPerson;
+  const otherPerson = anchorPerson==='khari' ? 'naila' : 'khari';
+  return d===0 ? anchorPerson : otherPerson;
+}
+function getVacuumPerson(iso, settings){
+  const d = ((diffDays(settings.vacuumAnchorDate, iso) % 2) + 2) % 2;
+  const anchorPerson = settings.vacuumAnchorPerson;
+  const otherPerson = anchorPerson==='khari' ? 'naila' : 'khari';
+  return d===0 ? anchorPerson : otherPerson;
+}
+function isLinensOnWeek(weekStartIso, settings){
+  const diffWeeks = Math.round(diffDays(startOfWeek(settings.linensAnchorDate), weekStartIso)/7);
+  const parity = ((diffWeeks % 2) + 2) % 2;
+  return settings.linensAnchorOnWeek ? parity===0 : parity===1;
+}
+function isHomeworkDay(iso){
+  if(iso < HOMEWORK_START || iso > HOMEWORK_END) return false;
+  const dow = dayOfWeek(iso);
+  if(dow===0 || dow===6) return false;
+  for(const [s,e] of HOMEWORK_EXCLUDED_RANGES){ if(iso>=s && iso<=e) return false; }
+  return true;
+}
+const KHAN_PAUSE_START = "2026-08-24";
+const KHAN_PAUSE_END = "2027-06-03";
+function isKhanActiveDay(iso){
+  const dow = dayOfWeek(iso);
+  if(dow===0 || dow===6) return false;
+  if(iso>=KHAN_PAUSE_START && iso<=KHAN_PAUSE_END) return false;
+  return true;
+}
+
+/* =========================== CHORE ACTIVATION =========================== */
+function isChoreActiveOnDate(chore, personId, iso, settings){
+  switch(chore.freq){
+    case 'daily': return true;
+    case 'weekday': { const d=dayOfWeek(iso); return d>=1 && d<=5; }
+    case 'khan': return isKhanActiveDay(iso);
+    case 'homework': return isHomeworkDay(iso);
+    case 'blinds-rotation': return getBlindsPerson(iso,settings)===personId;
+    case 'sweep-rotation': return getSweepPerson(iso,settings)===personId;
+    case 'vacuum-rotation': return getVacuumPerson(iso,settings)===personId;
+    case 'curb-rotation': return dayOfWeek(iso)===2 && getCurbPerson(iso,settings)===personId;
+    default: return false; // weekly-panel-only types
+  }
+}
+function getDogChoresForPersonOnDate(personId, iso, settings){
+  const weekNum = getDogWeekNumber(iso, settings);
+  const dayLabel = DAY_LABELS[dayOfWeek(iso)];
+  const displayName = PEOPLE.find(p=>p.id===personId).name;
+  const rows = DOG_CHART["WEEK "+weekNum] || [];
+  const out=[];
+  for(const row of rows){
+    if(row.assignments[dayLabel]===displayName){
+      out.push({id:'dog-'+row.chore.replace(/[^a-z0-9]+/gi,'-').toLowerCase(), name:row.chore, icon:DOG_CHORE_ICONS[row.chore]||'🐕', source:'Dog Care', detail:null});
+    }
+  }
+  return out;
+}
+function getChoresForDate(personId, iso, settings, customEntries){
+  const list = [...getDogChoresForPersonOnDate(personId, iso, settings)];
+  if(HOUSEHOLD_CHORES[personId]){
+    for(const chore of HOUSEHOLD_CHORES[personId]){
+      if(isChoreActiveOnDate(chore, personId, iso, settings)){
+        list.push({id:chore.id, name:chore.name, icon:chore.icon, source:'Household', detail:chore.detail||null});
+      }
+    }
+  }
+  for(const ce of (customEntries||[]).filter(e=>e.personId===personId && e.date===iso)){
+    list.push({id:ce.id, name:ce.name, icon:ce.icon||'📝', source:'Custom', detail:ce.time||null, custom:true});
+  }
+  return list;
+}
+function getWeeklyPanelItems(personId, weekStartIso, settings){
+  if(!HOUSEHOLD_CHORES[personId]) return [];
+  const out=[];
+  const bathWeek = getBathroomWeek(weekStartIso, settings);
+  const floorWeek = getFloorWeek(weekStartIso, settings);
+  for(const chore of HOUSEHOLD_CHORES[personId]){
+    switch(chore.freq){
+      case 'weekly':
+        out.push({id:chore.id, name:chore.name, icon:chore.icon, detail:chore.detail||'This week'});
+        break;
+      case 'every-other-week':
+        if(isLinensOnWeek(weekStartIso, settings)) out.push({id:chore.id, name:chore.name, icon:chore.icon, detail:'This week (every-other-week)'});
+        break;
+      case 'bathroom-rotation': {
+        const assignment = BATHROOM_ROTATION[bathWeek][personId];
+        if(assignment !== 'Off') out.push({id:chore.id, name:chore.name, icon:chore.icon, detail:assignment+' · Bathroom Week '+bathWeek});
+        break;
+      }
+      case 'floor-mop-whenA':
+        if(floorWeek==='A') out.push({id:chore.id, name:chore.name, icon:chore.icon, detail:chore.detail});
+        break;
+      case 'floor-mop-whenB':
+        if(floorWeek==='B') out.push({id:chore.id, name:chore.name, icon:chore.icon, detail:chore.detail});
+        break;
+      case 'floor-dust-whenA':
+        if(floorWeek==='A') out.push({id:chore.id, name:chore.name, icon:chore.icon, detail:chore.detail});
+        break;
+      case 'floor-dust-whenB':
+        if(floorWeek==='B') out.push({id:chore.id, name:chore.name, icon:chore.icon, detail:chore.detail});
+        break;
+    }
+  }
+  return out;
+}
+function computeWeeklyScorecard(personId, weekStartIso, settings, customEntries, checks){
+  let total=0, done=0;
+  for(let i=0;i<7;i++){
+    const iso = addDays(weekStartIso, i);
+    const chores = getChoresForDate(personId, iso, settings, customEntries);
+    for(const c of chores){
+      total++;
+      if(checks[personId+'|'+c.id+'|'+iso]) done++;
+    }
+  }
+  for(const c of getWeeklyPanelItems(personId, weekStartIso, settings)){
+    total++;
+    if(checks[personId+'|'+c.id+'|W'+weekStartIso]) done++;
+  }
+  return {total, done};
+}
+function computeDailyScorecard(personId, iso, settings, customEntries, checks){
+  const chores = getChoresForDate(personId, iso, settings, customEntries);
+  let done=0;
+  for(const c of chores){ if(checks[personId+'|'+c.id+'|'+iso]) done++; }
+  return {total: chores.length, done};
+}
+
+/* =========================== STATE =========================== */
+const LS_KEYS = {checks:'cct_checks', custom:'cct_custom', settings:'cct_settings'};
+function loadJSON(key, fallback){
+  try{ const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
+  catch(e){ return fallback; }
+}
+function saveJSON(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){} }
+
+let STATE = {
+  checks: loadJSON(LS_KEYS.checks, {}),
+  customEntries: loadJSON(LS_KEYS.custom, []),
+  settings: Object.assign({}, DEFAULT_SETTINGS, loadJSON(LS_KEYS.settings, {})),
+  activeTab: 'today',
+  peopleFilter: 'all',
+  activeDate: todayISO(),
+  weekStart: null,
+  scorecardWeekStart: null,
+  scorecardMode: 'weekly',
+  scorecardDate: todayISO()
+};
+
+function persistChecks(){ saveJSON(LS_KEYS.checks, STATE.checks); if(!applyingRemote) queuePushRemote(); }
+function persistCustom(){ saveJSON(LS_KEYS.custom, STATE.customEntries); if(!applyingRemote) queuePushRemote(); }
+function persistSettings(){ saveJSON(LS_KEYS.settings, STATE.settings); if(!applyingRemote) queuePushRemote(); }
+
+/* =========================== REMOTE SYNC (shared across family devices) =========================== */
+const SYNC_ENDPOINT = '/api/state';
+let applyingRemote = false;
+let pushTimer = null;
+
+function setSyncStatus(s){
+  const el = document.getElementById('syncStatus');
+  if(!el) return;
+  const labels = {idle:'⏳ Connecting…', syncing:'🔄 Syncing…', synced:'☁️ Synced', offline:'⚠️ Offline (saved on this device)'};
+  el.textContent = labels[s] || '';
+}
+function isAnyModalOpen(){
+  const a = document.getElementById('addEntryModal');
+  const b = document.getElementById('settingsModal');
+  return (a && a.classList.contains('show')) || (b && b.classList.contains('show'));
+}
+async function fetchRemoteState(){
+  try{
+    const res = await fetch(SYNC_ENDPOINT, {cache:'no-store'});
+    if(!res.ok) throw new Error('bad status');
+    return await res.json();
+  }catch(e){ return null; }
+}
+async function pushRemoteStateNow(){
+  const snapshot = { checks: STATE.checks, customEntries: STATE.customEntries, settings: STATE.settings };
+  try{
+    setSyncStatus('syncing');
+    const res = await fetch(SYNC_ENDPOINT, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(snapshot)
+    });
+    if(!res.ok) throw new Error('bad status');
+    setSyncStatus('synced');
+  }catch(e){ setSyncStatus('offline'); }
+}
+function queuePushRemote(){
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(pushRemoteStateNow, 600);
+}
+function applyRemoteState(data){
+  applyingRemote = true;
+  STATE.checks = data.checks || {};
+  STATE.customEntries = Array.isArray(data.customEntries) ? data.customEntries : [];
+  STATE.settings = Object.assign({}, DEFAULT_SETTINGS, data.settings||{});
+  persistChecks(); persistCustom(); persistSettings();
+  applyingRemote = false;
+}
+function isStateEmpty(data){
+  return (!data.checks || Object.keys(data.checks).length===0) &&
+         (!data.customEntries || data.customEntries.length===0) &&
+         (!data.settings || Object.keys(data.settings).length===0);
+}
+async function pollRemoteState(){
+  if(isAnyModalOpen()) return;
+  const data = await fetchRemoteState();
+  if(!data){ setSyncStatus('offline'); return; }
+  if(isStateEmpty(data)){ setSyncStatus('synced'); return; }
+  const incoming = JSON.stringify({checks:data.checks||{}, customEntries:data.customEntries||[], settings:Object.assign({}, DEFAULT_SETTINGS, data.settings||{})});
+  const current = JSON.stringify({checks:STATE.checks, customEntries:STATE.customEntries, settings:STATE.settings});
+  if(incoming !== current){
+    applyRemoteState(data);
+    renderApp();
+  }
+  setSyncStatus('synced');
+}
+async function initRemoteSync(){
+  setSyncStatus('idle');
+  const data = await fetchRemoteState();
+  if(data){
+    if(isStateEmpty(data)){
+      queuePushRemote(); // first-ever load: seed the shared store with this device's data
+    } else {
+      applyRemoteState(data);
+      renderApp();
+    }
+    setSyncStatus('synced');
+  } else {
+    setSyncStatus('offline');
+  }
+  setInterval(pollRemoteState, 15000);
+  document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') pollRemoteState(); });
+}
+
+function toggleCheck(key){
+  STATE.checks[key] = !STATE.checks[key];
+  persistChecks();
+  renderApp();
+}
+function addCustomEntry(entry){
+  entry.id = 'custom-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);
+  STATE.customEntries.push(entry);
+  persistCustom();
+  renderApp();
+}
+function removeCustomEntry(id){
+  STATE.customEntries = STATE.customEntries.filter(e=>e.id!==id);
+  persistCustom();
+  renderApp();
+}
+
+function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+function filteredPeople(){ return STATE.peopleFilter==='all' ? PEOPLE : PEOPLE.filter(p=>p.id===STATE.peopleFilter); }
+
+/* =========================== TOAST =========================== */
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  if(!t) return;
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove('show'), 1800);
+}
+
+/* =========================== RENDER: TABS + PEOPLE BAR =========================== */
+function renderTabs(){
+  const nav = document.getElementById('personTabs');
+  const tabs = [
+    {id:'today', name:'Today', icon:'📋'},
+    {id:'week', name:'This Week', icon:'📅'},
+    {id:'scorecard', name:'Scorecard', icon:'🏆'},
+    {id:'manage', name:'Manage Chores', icon:'🛠️'},
+    {id:'rotations', name:'Rotations Reference', icon:'🔄'}
+  ];
+  nav.innerHTML = '';
+  for(const t of tabs){
+    const btn = document.createElement('button');
+    btn.textContent = t.icon+' '+t.name;
+    if(STATE.activeTab===t.id) btn.classList.add('active');
+    btn.onclick = ()=>{ STATE.activeTab = t.id; renderApp(); };
+    nav.appendChild(btn);
+  }
+}
+function renderPeopleBar(){
+  const bar = document.getElementById('peopleBar');
+  bar.innerHTML = '';
+  const allChip = document.createElement('div');
+  allChip.className = 'chip'+(STATE.peopleFilter==='all'?' active':'');
+  allChip.style.setProperty('--c','var(--accent)');
+  allChip.innerHTML = '<span class="dot">👪</span>All';
+  allChip.onclick = ()=>{ STATE.peopleFilter='all'; renderApp(); };
+  bar.appendChild(allChip);
+  for(const p of PEOPLE){
+    const chip = document.createElement('div');
+    chip.className = 'chip'+(STATE.peopleFilter===p.id?' active':'');
+    chip.style.setProperty('--c', PERSON_COLOR[p.id]);
+    chip.innerHTML = `<span class="dot">${p.icon}</span>${p.name}`;
+    chip.onclick = ()=>{ STATE.peopleFilter=p.id; renderApp(); };
+    bar.appendChild(chip);
+  }
+}
+
+/* =========================== RENDER: APP DISPATCH =========================== */
+function renderApp(){
+  renderTabs();
+  renderPeopleBar();
+  const app = document.getElementById('app');
+  app.innerHTML = '';
+  if(STATE.activeTab==='today') app.appendChild(renderTodayTab());
+  else if(STATE.activeTab==='week') app.appendChild(renderWeekTab());
+  else if(STATE.activeTab==='scorecard') app.appendChild(renderScorecard());
+  else if(STATE.activeTab==='manage') app.appendChild(renderManageTab());
+  else if(STATE.activeTab==='rotations') app.appendChild(renderRotationsTab());
+}
+
+/* =========================== RENDER: TODAY =========================== */
+function renderTodayTab(){
+  const wrap = document.createElement('div');
+  const iso = STATE.activeDate;
+  const weekStart = startOfWeek(iso);
+
+  const dateCard = document.createElement('div');
+  dateCard.className='card';
+  dateCard.innerHTML = `<h2>📋 ${formatLong(iso)}</h2>
+    <div class="dateNav">
+      <button class="btn secondary small" id="today-prev">◀</button>
+      <input type="date" id="today-picker" value="${iso}">
+      <button class="btn secondary small" id="today-next">▶</button>
+      <button class="btn secondary small" id="today-jump">Today</button>
+      <span class="pill">Dog Week ${getDogWeekNumber(iso, STATE.settings)} · Blinds today: ${cap(getBlindsPerson(iso, STATE.settings))}</span>
+    </div>`;
+  wrap.appendChild(dateCard);
+
+  for(const p of filteredPeople()){
+    const chores = getChoresForDate(p.id, iso, STATE.settings, STATE.customEntries);
+    const doneCount = chores.filter(c=>STATE.checks[p.id+'|'+c.id+'|'+iso]).length;
+    const card = document.createElement('div');
+    card.className='card';
+    card.innerHTML = `<h2 style="color:${PERSON_COLOR[p.id]}">${p.icon} ${p.name}<span class="pill" style="margin-left:auto">${doneCount}/${chores.length} today</span></h2>
+      <ul class="chorelist" id="today-list-${p.id}"></ul>`;
+    const list = card.querySelector('#today-list-'+p.id);
+    if(!chores.length){
+      list.innerHTML = '<li style="color:var(--muted)">No chores scheduled today 🎉</li>';
+    } else {
+      for(const c of chores){
+        const key = p.id+'|'+c.id+'|'+iso;
+        const li = document.createElement('li');
+        li.innerHTML = `<input type="checkbox" ${STATE.checks[key]?'checked':''}>
+          <span class="icon">${c.icon}</span>
+          <span class="name">${escapeHtml(c.name)} <small class="${c.custom?'tag-custom':c.source==='Dog Care'?'tag-dog':'tag-household'}">${c.source}${c.detail? ' · '+escapeHtml(c.detail):''}</small></span>
+          ${c.custom? '<button class="removeBtn" title="Remove">✕</button>' : ''}`;
+        li.querySelector('input').onchange = ()=>toggleCheck(key);
+        if(c.custom){ li.querySelector('.removeBtn').onclick = ()=>removeCustomEntry(c.id); }
+        list.appendChild(li);
+      }
+    }
+    wrap.appendChild(card);
+  }
+
+  setTimeout(()=>{
+    document.getElementById('today-picker').onchange = (e)=>{ STATE.activeDate=e.target.value; renderApp(); };
+    document.getElementById('today-prev').onclick = ()=>{ STATE.activeDate=addDays(iso,-1); renderApp(); };
+    document.getElementById('today-next').onclick = ()=>{ STATE.activeDate=addDays(iso,1); renderApp(); };
+    document.getElementById('today-jump').onclick = ()=>{ STATE.activeDate=todayISO(); renderApp(); };
+  },0);
+  return wrap;
+}
+
+/* =========================== RENDER: THIS WEEK =========================== */
+function renderWeekTab(){
+  const wrap = document.createElement('div');
+  if(!STATE.weekStart) STATE.weekStart = startOfWeek(STATE.activeDate);
+  const weekStart = STATE.weekStart;
+
+  const navCard = document.createElement('div');
+  navCard.className='card';
+  navCard.innerHTML = `<h2>📅 This Week</h2>
+    <div class="dateNav">
+      <button class="btn secondary small" id="week-prev">◀ Prior Week</button>
+      <span class="pill" style="font-size:13px;padding:6px 12px">Week of ${formatShort(weekStart)} – ${formatShort(addDays(weekStart,6))}</span>
+      <button class="btn secondary small" id="week-next">Next Week ▶</button>
+      <button class="btn secondary small" id="week-thisweek">This Week</button>
+    </div>`;
+  wrap.appendChild(navCard);
+
+  for(const p of filteredPeople()){
+    wrap.appendChild(renderPersonWeekCard(p, weekStart));
+  }
+
+  setTimeout(()=>{
+    document.getElementById('week-prev').onclick = ()=>{ STATE.weekStart=addDays(weekStart,-7); renderApp(); };
+    document.getElementById('week-next').onclick = ()=>{ STATE.weekStart=addDays(weekStart,7); renderApp(); };
+    document.getElementById('week-thisweek').onclick = ()=>{ STATE.weekStart=startOfWeek(todayISO()); renderApp(); };
+  },0);
+  return wrap;
+}
+function renderPersonWeekCard(p, weekStart){
+  const card = document.createElement('div');
+  card.className='card';
+  const sc = computeWeeklyScorecard(p.id, weekStart, STATE.settings, STATE.customEntries, STATE.checks);
+  card.innerHTML = `<h2 style="color:${PERSON_COLOR[p.id]}">${p.icon} ${p.name}<span class="pill" style="margin-left:auto">${sc.done}/${sc.total} this wk</span></h2>`;
+
+  const dayChoreLists = [];
+  for(let i=0;i<7;i++){ dayChoreLists.push(getChoresForDate(p.id, addDays(weekStart,i), STATE.settings, STATE.customEntries)); }
+  const choreMap = new Map();
+  for(const dayList of dayChoreLists){ for(const c of dayList){ if(!choreMap.has(c.id)) choreMap.set(c.id, c); } }
+  const weeklyItems = getWeeklyPanelItems(p.id, weekStart, STATE.settings);
+
+  if(!choreMap.size && !weeklyItems.length){
+    card.innerHTML += '<p style="color:var(--muted);font-size:13px">No chores this week.</p>';
+    return card;
+  }
+
+  let html = '<div style="overflow-x:auto"><table class="grid"><thead><tr><th style="text-align:left">Chore</th>';
+  for(const d of DAY_LABELS) html += `<th>${d}</th>`;
+  html += '<th>This Week</th></tr></thead><tbody>';
+  for(const [id, c] of choreMap){
+    html += `<tr><td class="chorecell">${c.icon} ${escapeHtml(c.name)}</td>`;
+    for(let i=0;i<7;i++){
+      const iso = addDays(weekStart,i);
+      const due = dayChoreLists[i].some(x=>x.id===id);
+      if(due){
+        const key = p.id+'|'+id+'|'+iso;
+        html += `<td><input type="checkbox" data-key="${key}" ${STATE.checks[key]?'checked':''}></td>`;
+      } else {
+        html += '<td style="color:#cfcac0">–</td>';
+      }
+    }
+    html += '<td style="color:#cfcac0">–</td></tr>';
+  }
+  for(const c of weeklyItems){
+    html += `<tr><td class="chorecell">${c.icon} ${escapeHtml(c.name)}<br><small style="color:var(--muted);font-weight:400">${escapeHtml(c.detail||'')}</small></td>`;
+    for(let i=0;i<7;i++) html += '<td style="color:#cfcac0">–</td>';
+    const key = p.id+'|'+c.id+'|W'+weekStart;
+    html += `<td><input type="checkbox" data-key="${key}" ${STATE.checks[key]?'checked':''}></td></tr>`;
+  }
+  html += '</tbody></table></div>';
+  card.innerHTML += html;
+  card.querySelectorAll('input[type=checkbox]').forEach(cb=>{ cb.onchange = ()=>toggleCheck(cb.dataset.key); });
+  return card;
+}
+
+/* =========================== RENDER: SCORECARD =========================== */
+function renderScorecard(){
+  if(!STATE.scorecardWeekStart) STATE.scorecardWeekStart = startOfWeek(STATE.activeDate);
+  if(!STATE.scorecardDate) STATE.scorecardDate = todayISO();
+  const wrap = document.createElement('div');
+
+  const modeTabs = document.createElement('div');
+  modeTabs.className = 'subtabs';
+  modeTabs.innerHTML = `
+    <button id="sc-mode-weekly" class="${STATE.scorecardMode==='daily'?'':'active'}">📅 Weekly Scorecard</button>
+    <button id="sc-mode-daily" class="${STATE.scorecardMode==='daily'?'active':''}">📋 Daily Accumulated Scorecard</button>
+  `;
+  wrap.appendChild(modeTabs);
+
+  if(STATE.scorecardMode==='daily'){
+    wrap.appendChild(renderDailyScorecard());
+  } else {
+    wrap.appendChild(renderWeeklyScorecard());
+  }
+
+  setTimeout(()=>{
+    document.getElementById('sc-mode-weekly').onclick = ()=>{ STATE.scorecardMode='weekly'; renderApp(); };
+    document.getElementById('sc-mode-daily').onclick = ()=>{ STATE.scorecardMode='daily'; renderApp(); };
+  },0);
+
+  return wrap;
+}
+
+/* ---- Weekly mode (original scorecard: ranks the week's totals) ---- */
+function renderWeeklyScorecard(){
+  const weekStart = STATE.scorecardWeekStart;
+  const wrap = document.createElement('div');
+
+  const rows = PEOPLE.map(p=>{
+    const sc = computeWeeklyScorecard(p.id, weekStart, STATE.settings, STATE.customEntries, STATE.checks);
+    const pct = sc.total ? Math.round(100*sc.done/sc.total) : 0;
+    return {person:p, done:sc.done, total:sc.total, pct};
+  }).sort((a,b)=> b.pct-a.pct || b.done-a.done || a.person.name.localeCompare(b.person.name));
+
+  const familyDone = rows.reduce((s,r)=>s+r.done,0);
+  const familyTotal = rows.reduce((s,r)=>s+r.total,0);
+  const familyPct = familyTotal ? Math.round(100*familyDone/familyTotal) : 0;
+
+  const medals = ['🥇','🥈','🥉'];
+
+  const header = document.createElement('div');
+  header.className='card';
+  header.innerHTML = `<h2>🏆 Family Scorecard</h2>
+    <div class="dateNav">
+      <button class="btn secondary small" id="sc-prev">◀ Prior Week</button>
+      <span class="pill" style="font-size:13px;padding:6px 12px">Week of ${formatShort(weekStart)} – ${formatShort(addDays(weekStart,6))}</span>
+      <button class="btn secondary small" id="sc-next">Next Week ▶</button>
+      <button class="btn secondary small" id="sc-thisweek">This Week</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <div class="progressWrap"><div class="progressBar" style="width:${familyPct}%;background:${familyPct>=80?'var(--good)':familyPct>=40?'var(--warn)':'var(--bad)'}"></div></div>
+      <span style="font-size:13px;color:var(--muted);white-space:nowrap">Whole family: ${familyDone}/${familyTotal} (${familyPct}%)</span>
+    </div>`;
+  wrap.appendChild(header);
+
+  const board = document.createElement('div');
+  board.className='card';
+  board.innerHTML = '<h2>📊 Leaderboard — this week, ranked</h2>';
+  const list = document.createElement('div');
+  rows.forEach((r,i)=>{
+    if(STATE.peopleFilter!=='all' && r.person.id!==STATE.peopleFilter) return;
+    const item = document.createElement('div');
+    item.style.cssText = 'display:flex;align-items:center;gap:12px;padding:12px 6px;border-bottom:1px solid var(--line)';
+    item.innerHTML = `
+      <span style="font-size:20px;width:30px;text-align:center">${medals[i]||('#'+(i+1))}</span>
+      <span style="font-size:22px">${r.person.icon}</span>
+      <span style="flex:0 0 90px;font-weight:700;color:${PERSON_COLOR[r.person.id]}">${r.person.name}</span>
+      <div class="progressWrap"><div class="progressBar" style="width:${r.pct}%;background:${r.pct>=80?'var(--good)':r.pct>=40?'var(--warn)':'var(--bad)'}"></div></div>
+      <span style="flex:0 0 110px;text-align:right;font-size:13px;color:var(--muted)">${r.done}/${r.total} · ${r.pct}%</span>`;
+    list.appendChild(item);
+  });
+  board.appendChild(list);
+  wrap.appendChild(board);
+
+  const exportCard = document.createElement('div');
+  exportCard.className='card';
+  exportCard.innerHTML = '<h2>📤 Export Scorecard</h2><div class="row"><button class="btn" id="sc-email">✉️ Email Scorecard</button></div>';
+  wrap.appendChild(exportCard);
+
+  setTimeout(()=>{
+    document.getElementById('sc-prev').onclick = ()=>{ STATE.scorecardWeekStart = addDays(weekStart,-7); renderApp(); };
+    document.getElementById('sc-next').onclick = ()=>{ STATE.scorecardWeekStart = addDays(weekStart,7); renderApp(); };
+    document.getElementById('sc-thisweek').onclick = ()=>{ STATE.scorecardWeekStart = startOfWeek(todayISO()); renderApp(); };
+    document.getElementById('sc-email').onclick = ()=>{
+      const lines = [`🏆 Clinton Family Scorecard — Week of ${formatShort(weekStart)}`, ''];
+      rows.forEach((r,i)=>lines.push(`${medals[i]||('#'+(i+1))} ${r.person.name}: ${r.done}/${r.total} (${r.pct}%)`));
+      lines.push('', `Whole family: ${familyDone}/${familyTotal} (${familyPct}%)`);
+      openMailto(`Clinton Family Scorecard — Week of ${formatShort(weekStart)}`, lines.join('\n'));
+    };
+  },0);
+
+  return wrap;
+}
+
+/* ---- Daily mode (new: ranks today's — or any chosen day's — accumulated checklist totals) ---- */
+function renderDailyScorecard(){
+  const iso = STATE.scorecardDate;
+  const wrap = document.createElement('div');
+
+  const rows = PEOPLE.map(p=>{
+    const sc = computeDailyScorecard(p.id, iso, STATE.settings, STATE.customEntries, STATE.checks);
+    const pct = sc.total ? Math.round(100*sc.done/sc.total) : 0;
+    return {person:p, done:sc.done, total:sc.total, pct};
+  }).sort((a,b)=> b.pct-a.pct || b.done-a.done || a.person.name.localeCompare(b.person.name));
+
+  const familyDone = rows.reduce((s,r)=>s+r.done,0);
+  const familyTotal = rows.reduce((s,r)=>s+r.total,0);
+  const familyPct = familyTotal ? Math.round(100*familyDone/familyTotal) : 0;
+
+  const medals = ['🥇','🥈','🥉'];
+
+  const header = document.createElement('div');
+  header.className='card';
+  header.innerHTML = `<h2>📋 Daily Accumulated Scorecard</h2>
+    <p style="font-size:12.5px;color:var(--muted);margin:0 0 10px">Ranks each person by how much of ${formatLong(iso)}'s checklist they've checked off so far — the totals accumulate live as boxes get checked on the Today tab.</p>
+    <div class="dateNav">
+      <button class="btn secondary small" id="scd-prev">◀</button>
+      <input type="date" id="scd-picker" value="${iso}">
+      <button class="btn secondary small" id="scd-next">▶</button>
+      <button class="btn secondary small" id="scd-today">Today</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <div class="progressWrap"><div class="progressBar" style="width:${familyPct}%;background:${familyPct>=80?'var(--good)':familyPct>=40?'var(--warn)':'var(--bad)'}"></div></div>
+      <span style="font-size:13px;color:var(--muted);white-space:nowrap">Whole family: ${familyDone}/${familyTotal} (${familyPct}%)</span>
+    </div>`;
+  wrap.appendChild(header);
+
+  const board = document.createElement('div');
+  board.className='card';
+  board.innerHTML = '<h2>📊 Leaderboard — accumulated today, ranked</h2>';
+  const list = document.createElement('div');
+  rows.forEach((r,i)=>{
+    if(STATE.peopleFilter!=='all' && r.person.id!==STATE.peopleFilter) return;
+    const item = document.createElement('div');
+    item.style.cssText = 'display:flex;align-items:center;gap:12px;padding:12px 6px;border-bottom:1px solid var(--line)';
+    item.innerHTML = `
+      <span style="font-size:20px;width:30px;text-align:center">${medals[i]||('#'+(i+1))}</span>
+      <span style="font-size:22px">${r.person.icon}</span>
+      <span style="flex:0 0 90px;font-weight:700;color:${PERSON_COLOR[r.person.id]}">${r.person.name}</span>
+      <div class="progressWrap"><div class="progressBar" style="width:${r.pct}%;background:${r.pct>=80?'var(--good)':r.pct>=40?'var(--warn)':'var(--bad)'}"></div></div>
+      <span style="flex:0 0 110px;text-align:right;font-size:13px;color:var(--muted)">${r.done}/${r.total} · ${r.pct}%</span>`;
+    list.appendChild(item);
+  });
+  board.appendChild(list);
+  wrap.appendChild(board);
+
+  const exportCard = document.createElement('div');
+  exportCard.className='card';
+  exportCard.innerHTML = '<h2>📤 Export Daily Scorecard</h2><div class="row"><button class="btn" id="scd-email">✉️ Email Daily Scorecard</button></div>';
+  wrap.appendChild(exportCard);
+
+  setTimeout(()=>{
+    document.getElementById('scd-prev').onclick = ()=>{ STATE.scorecardDate = addDays(iso,-1); renderApp(); };
+    document.getElementById('scd-next').onclick = ()=>{ STATE.scorecardDate = addDays(iso,1); renderApp(); };
+    document.getElementById('scd-today').onclick = ()=>{ STATE.scorecardDate = todayISO(); renderApp(); };
+    document.getElementById('scd-picker').onchange = (e)=>{ STATE.scorecardDate = e.target.value; renderApp(); };
+    document.getElementById('scd-email').onclick = ()=>{
+      const lines = [`📋 Clinton Family Daily Scorecard — ${formatLong(iso)}`, ''];
+      rows.forEach((r,i)=>lines.push(`${medals[i]||('#'+(i+1))} ${r.person.name}: ${r.done}/${r.total} (${r.pct}%)`));
+      lines.push('', `Whole family: ${familyDone}/${familyTotal} (${familyPct}%)`);
+      openMailto(`Clinton Family Daily Scorecard — ${formatLong(iso)}`, lines.join('\n'));
+    };
+  },0);
+
+  return wrap;
+}
+
+/* =========================== RENDER: MANAGE CHORES =========================== */
+function freqLabel(c){
+  const map = {
+    daily:'Daily', weekday:'Weekdays', weekly:'Weekly (no fixed day)', 'every-other-week':'Every other week',
+    'bathroom-rotation':'Bathroom rotation (Sat)', 'curb-rotation':'Curb rotation (Tue, weekly)', 'blinds-rotation':'Blinds rotation (every other day)',
+    'sweep-rotation':'Sweep rotation (every other day)', 'vacuum-rotation':'Vacuum rotation (every other day)',
+    'floor-dust-whenA':'Floor rotation', 'floor-dust-whenB':'Floor rotation',
+    'floor-mop-whenA':'Floor rotation', 'floor-mop-whenB':'Floor rotation', homework:'School year, Mon–Fri',
+    khan:'Weekdays (paused during school year)'
+  };
+  return map[c.freq] || c.freq;
+}
+function renderManageTab(){
+  const wrap = document.createElement('div');
+  const note = document.createElement('div');
+  note.className='card';
+  note.innerHTML = `<h2>🛠️ Manage Chores</h2>
+    <p style="font-size:12.5px;color:var(--muted);margin:0">Built-in household, school, and dog-care chores follow this tracker's rotation rules and can't be freely edited here — adjust their rotation anchors instead via ⚙️ Settings. Custom one-off entries (anything added via "+ Add Chore") can be edited or removed below.</p>`;
+  wrap.appendChild(note);
+
+  for(const p of filteredPeople()){
+    const card = document.createElement('div');
+    card.className='card';
+    const builtins = [...(HOUSEHOLD_CHORES[p.id]||[])];
+    const customs = STATE.customEntries.filter(e=>e.personId===p.id);
+    card.innerHTML = `<h2 style="color:${PERSON_COLOR[p.id]}">${p.icon} ${p.name}</h2>`;
+    if(builtins.length){
+      card.innerHTML += '<p style="font-size:12px;font-weight:700;color:var(--muted);margin:10px 0 4px">Built-in chores</p>';
+      card.innerHTML += '<ul class="chorelist">'+builtins.map(c=>`<li><span class="icon">${c.icon}</span><span class="name">${escapeHtml(c.name)}<small>${escapeHtml(freqLabel(c))}${c.detail? ' · '+escapeHtml(c.detail):''}</small></span></li>`).join('')+'</ul>';
+    } else {
+      card.innerHTML += '<p style="font-size:13px;color:var(--muted);margin:10px 0">Dog Care only — no built-in household chores.</p>';
+    }
+    card.innerHTML += `<p style="font-size:12px;font-weight:700;color:var(--muted);margin:10px 0 4px">Custom entries</p>`;
+    const customList = document.createElement('ul');
+    customList.className='chorelist';
+    if(!customs.length){
+      customList.innerHTML = '<li style="color:var(--muted);font-size:13px">No custom entries yet.</li>';
+    } else {
+      for(const ce of customs){
+        const li = document.createElement('li');
+        li.innerHTML = `<span class="icon">${ce.icon||'📝'}</span><span class="name">${escapeHtml(ce.name)}<small>${formatShort(ce.date)}${ce.time? ' · '+ce.time:''}</small></span>
+          <button class="btn small secondary" title="Edit">✏️</button>
+          <button class="removeBtn" title="Remove">✕</button>`;
+        const buttons = li.querySelectorAll('button');
+        buttons[0].onclick = ()=>openAddEntryModal(p.id, ce.id);
+        buttons[1].onclick = ()=>{ removeCustomEntry(ce.id); showToast('Chore removed'); };
+        customList.appendChild(li);
+      }
+    }
+    card.appendChild(customList);
+    const addRow = document.createElement('div');
+    addRow.className='row';
+    addRow.style.marginTop='10px';
+    addRow.innerHTML = `<button class="btn small">+ Add Custom Entry for ${p.name}</button>`;
+    addRow.querySelector('button').onclick = ()=>openAddEntryModal(p.id);
+    card.appendChild(addRow);
+    wrap.appendChild(card);
+  }
+  return wrap;
+}
+
+/* =========================== RENDER: ROTATIONS REFERENCE =========================== */
+function renderRotationsTab(){
+  const wrap = document.createElement('div');
+
+  const bath = document.createElement('div');
+  bath.className='card';
+  let bathHtml = `<h2>🚽 Bathroom Cleaning Rotation<span class="pill" style="margin-left:auto">3-week cycle</span></h2>
+    <table class="grid"><thead><tr><th style="text-align:left">Week</th><th>Tariq</th><th>Khari</th><th>Naila</th></tr></thead><tbody>`;
+  for(const w of [1,2,3]){
+    const r = BATHROOM_ROTATION[w];
+    bathHtml += `<tr><td class="chorecell">Week ${w}</td><td>${r.tariq==='Off'?'🏖️ Off':r.tariq}</td><td>${r.khari==='Off'?'🏖️ Off':r.khari}</td><td>${r.naila==='Off'?'🏖️ Off':r.naila}</td></tr>`;
+  }
+  bathHtml += '</tbody></table>';
+  bath.innerHTML = bathHtml;
+  wrap.appendChild(bath);
+
+  const floor = document.createElement('div');
+  floor.className='card';
+  floor.innerHTML = `<h2>🧽 Mop &amp; Dust Rotation<span class="pill" style="margin-left:auto">Alternates weekly</span></h2>
+    <table class="grid"><thead><tr><th style="text-align:left">Week</th><th>Khari</th><th>Naila</th></tr></thead><tbody>
+      <tr><td class="chorecell">Week A</td><td>🧽 Mop Floors</td><td>🪶 Dust – Rest of House</td></tr>
+      <tr><td class="chorecell">Week B</td><td>🪶 Dust – Rest of House</td><td>🧽 Mop Floors</td></tr>
+    </tbody></table>`;
+  wrap.appendChild(floor);
+
+  const thisWeekStart = startOfWeek(todayISO());
+
+  const curb = document.createElement('div');
+  curb.className='card';
+  curb.innerHTML = `<h2>🚮 Curb Collection Rotation<span class="pill" style="margin-left:auto">Tue evenings</span></h2>
+    <p style="font-size:13px">Rotates weekly: Tariq → Khari → Naila. This week (${formatShort(thisWeekStart)}): <strong style="color:${PERSON_COLOR[getCurbPerson(thisWeekStart,STATE.settings)]}">${cap(getCurbPerson(thisWeekStart,STATE.settings))}</strong></p>`;
+  wrap.appendChild(curb);
+
+  const blinds = document.createElement('div');
+  blinds.className='card';
+  blinds.innerHTML = `<h2>🪟 Blinds Rotation<span class="pill" style="margin-left:auto">Every other day</span></h2>
+    <p style="font-size:13px">Alternates daily between Khari and Naila. Today: <strong style="color:${PERSON_COLOR[getBlindsPerson(todayISO(),STATE.settings)]}">${cap(getBlindsPerson(todayISO(),STATE.settings))}</strong></p>`;
+  wrap.appendChild(blinds);
+
+  const sweep = document.createElement('div');
+  sweep.className='card';
+  sweep.innerHTML = `<h2>🧹 Sweep Floor Rotation<span class="pill" style="margin-left:auto">Every other day</span></h2>
+    <p style="font-size:13px">Alternates daily between Khari and Naila. Today: <strong style="color:${PERSON_COLOR[getSweepPerson(todayISO(),STATE.settings)]}">${cap(getSweepPerson(todayISO(),STATE.settings))}</strong></p>`;
+  wrap.appendChild(sweep);
+
+  const vacuum = document.createElement('div');
+  vacuum.className='card';
+  vacuum.innerHTML = `<h2>🧹 Vacuum Floor Rotation<span class="pill" style="margin-left:auto">Every other day</span></h2>
+    <p style="font-size:13px">Alternates daily between Khari and Naila. Today: <strong style="color:${PERSON_COLOR[getVacuumPerson(todayISO(),STATE.settings)]}">${cap(getVacuumPerson(todayISO(),STATE.settings))}</strong></p>`;
+  wrap.appendChild(vacuum);
+
+  const linens = document.createElement('div');
+  linens.className='card';
+  const linensThisWeek = isLinensOnWeek(thisWeekStart, STATE.settings);
+  linens.innerHTML = `<h2>🛌 Linens Rotation<span class="pill" style="margin-left:auto">Every other week</span></h2>
+    <p style="font-size:13px">Khari, Naila, and Tariq each wash their own linens every other week. This week is ${linensThisWeek? '<strong style="color:var(--good)">a wash week</strong>':'<strong>not a wash week</strong>'}.</p>`;
+  wrap.appendChild(linens);
+
+  const dog = document.createElement('div');
+  dog.className='card';
+  const currentDogWeek = getDogWeekNumber(todayISO(), STATE.settings);
+  dog.innerHTML = `<h2>🐕 Dog Care Rotation<span class="pill" style="margin-left:auto">4-week cycle</span></h2>
+    <div class="row" style="margin-bottom:10px">
+      <label style="font-size:13px;font-weight:600">Show:</label>
+      <select id="dogWeekPick">
+        ${[1,2,3,4].map(n=>`<option value="${n}" ${n===currentDogWeek?'selected':''}>Week ${n}${n===currentDogWeek?' (Current)':''}</option>`).join('')}
+      </select>
+    </div>
+    <div style="overflow-x:auto" id="dogRefTableWrap"></div>`;
+  wrap.appendChild(dog);
+
+  const reminders = document.createElement('div');
+  reminders.className='card';
+  reminders.innerHTML = `<h2>📋 Quick Reminders</h2>
+    <div class="overviewGrid">
+      <div class="personMini"><strong>🗑️ Trash Day — Tuesday evening</strong><div style="font-size:12.5px;color:var(--muted);margin-top:4px">Tariq checks bins daily. Curb duty rotates weekly: Tariq → Khari → Naila.</div></div>
+      <div class="personMini"><strong>🪟 Close Blinds</strong><div style="font-size:12.5px;color:var(--muted);margin-top:4px">Daily — Khari and Naila alternate every other day.</div></div>
+      <div class="personMini"><strong>💊 Naila's Daily Habits</strong><div style="font-size:12.5px;color:var(--muted);margin-top:4px">Skin care morning AND bedtime, plus medication at bedtime — non-negotiable daily.</div></div>
+      <div class="personMini"><strong>📚🎷 Khari's Practice</strong><div style="font-size:12.5px;color:var(--muted);margin-top:4px">Saxophone practice Mon–Fri. Khan Academy math Mon–Fri, paused during the school year (Aug 24 – Jun 3) since Homework Time covers it then.</div></div>
+      <div class="personMini"><strong>🛌 Linen Washing</strong><div style="font-size:12.5px;color:var(--muted);margin-top:4px">Tariq, Khari, and Naila each wash their own linens every other week.</div></div>
+      <div class="personMini"><strong>📖 Homework Time</strong><div style="font-size:12.5px;color:var(--muted);margin-top:4px">Khari & Naila, Mon–Fri during the school year (Aug 24 – Jun 2), school breaks excluded.</div></div>
+    </div>`;
+  wrap.appendChild(reminders);
+
+  setTimeout(()=>{
+    const fillDogTable = (week)=>{
+      const rows = DOG_CHART['WEEK '+week] || [];
+      let html = '<table class="grid"><thead><tr><th style="text-align:left">Chore</th>'+DAY_LABELS.map(d=>`<th>${d}</th>`).join('')+'</tr></thead><tbody>';
+      for(const row of rows){
+        html += `<tr><td class="chorecell">${DOG_CHORE_ICONS[row.chore]||'🐕'} ${escapeHtml(row.chore)}</td>`;
+        for(const d of DAY_LABELS){ html += `<td>${row.assignments[d]==='—'?'<span style="color:#cfcac0">–</span>':row.assignments[d]}</td>`; }
+        html += '</tr>';
+      }
+      html += '</tbody></table>';
+      document.getElementById('dogRefTableWrap').innerHTML = html;
+    };
+    fillDogTable(currentDogWeek);
+    document.getElementById('dogWeekPick').onchange = (e)=>fillDogTable(e.target.value);
+  },0);
+
+  return wrap;
+}
+
+/* =========================== MODAL: ADD/EDIT CHORE =========================== */
+let editingEntryId = null;
+function openAddEntryModal(defaultPersonId, editId){
+  editingEntryId = editId || null;
+  const overlay = document.getElementById('addEntryModal');
+  const sel = document.getElementById('ae-person');
+  const editing = editId ? STATE.customEntries.find(e=>e.id===editId) : null;
+  sel.innerHTML = PEOPLE.map(p=>`<option value="${p.id}" ${(editing?editing.personId:defaultPersonId)===p.id?'selected':''}>${p.icon} ${p.name}</option>`).join('');
+  document.getElementById('ae-name').value = editing ? editing.name : '';
+  document.getElementById('ae-icon').value = editing ? (editing.icon||'') : '';
+  document.getElementById('ae-date').value = editing ? editing.date : STATE.activeDate;
+  document.getElementById('ae-time').value = editing ? (editing.time||'') : '';
+  document.getElementById('ae-title').textContent = editing ? '✏️ Edit Chore' : '+ Add Chore';
+  document.getElementById('ae-save').textContent = editing ? 'Save Changes' : 'Add Chore';
+  overlay.classList.add('show');
+}
+function closeAddEntryModal(){ document.getElementById('addEntryModal').classList.remove('show'); editingEntryId = null; renderApp(); }
+document.getElementById('ae-cancel').onclick = closeAddEntryModal;
+document.getElementById('ae-save').onclick = ()=>{
+  const name = document.getElementById('ae-name').value.trim();
+  if(!name){ alert('Please enter a chore/task name.'); return; }
+  const data = {
+    personId: document.getElementById('ae-person').value,
+    name,
+    icon: document.getElementById('ae-icon').value.trim(),
+    date: document.getElementById('ae-date').value || STATE.activeDate,
+    time: document.getElementById('ae-time').value
+  };
+  if(editingEntryId){
+    const entry = STATE.customEntries.find(e=>e.id===editingEntryId);
+    if(entry){ Object.assign(entry, data); persistCustom(); }
+    showToast('Chore updated');
+    closeAddEntryModal();
+  } else {
+    addCustomEntry(data);
+    showToast('Chore added');
+    closeAddEntryModal();
+  }
+};
+
+/* =========================== MODAL: SETTINGS =========================== */
+function openSettingsModal(){
+  const form = document.getElementById('settingsForm');
+  const s = STATE.settings;
+  form.innerHTML = `
+    <div class="field"><label>Dog Chore Week override (leave blank for auto)</label>
+      <select id="set-dogweek"><option value="">Auto (current: ${getDogWeekNumber(todayISO(), {})})</option>
+      ${[1,2,3,4].map(n=>`<option value="${n}" ${s.dogWeekOverride==n?'selected':''}>Week ${n}</option>`).join('')}</select></div>
+    <div class="field"><label>Bathroom rotation — anchor date (a Sunday)</label><input id="set-bathdate" type="date" value="${s.bathroomAnchorDate}"></div>
+    <div class="field"><label>...and the Bathroom Week (1–3) that begins on that Sunday</label>
+      <select id="set-bathweek">${[1,2,3].map(n=>`<option value="${n}" ${s.bathroomAnchorWeek==n?'selected':''}>Week ${n}</option>`).join('')}</select></div>
+    <div class="field"><label>Floor/Dish rotation — anchor date (a Sunday)</label><input id="set-floordate" type="date" value="${s.floorAnchorDate}"></div>
+    <div class="field"><label>...and the Floor Week (A/B) that begins on that Sunday</label>
+      <select id="set-floorweek"><option value="A" ${s.floorAnchorWeek==='A'?'selected':''}>A (Khari vacuums/mops, Naila dusts)</option><option value="B" ${s.floorAnchorWeek==='B'?'selected':''}>B (Naila vacuums/mops, Khari dusts)</option></select></div>
+    <div class="field"><label>Curb rotation — anchor date (a Sunday)</label><input id="set-curbdate" type="date" value="${s.curbAnchorDate}"></div>
+    <div class="field"><label>...and who's on curb duty that week</label>
+      <select id="set-curbperson"><option value="tariq" ${s.curbAnchorPerson==='tariq'?'selected':''}>Tariq</option><option value="khari" ${s.curbAnchorPerson==='khari'?'selected':''}>Khari</option><option value="naila" ${s.curbAnchorPerson==='naila'?'selected':''}>Naila</option></select></div>
+    <div class="field"><label>Blinds rotation — anchor date</label><input id="set-blindsdate" type="date" value="${s.blindsAnchorDate}"></div>
+    <div class="field"><label>...who closes blinds on that date</label>
+      <select id="set-blindsperson"><option value="khari" ${s.blindsAnchorPerson==='khari'?'selected':''}>Khari</option><option value="naila" ${s.blindsAnchorPerson==='naila'?'selected':''}>Naila</option></select></div>
+    <div class="field"><label>Sweep Floor rotation — anchor date</label><input id="set-sweepdate" type="date" value="${s.sweepAnchorDate}"></div>
+    <div class="field"><label>...who sweeps on that date</label>
+      <select id="set-sweepperson"><option value="khari" ${s.sweepAnchorPerson==='khari'?'selected':''}>Khari</option><option value="naila" ${s.sweepAnchorPerson==='naila'?'selected':''}>Naila</option></select></div>
+    <div class="field"><label>Vacuum Floor rotation — anchor date</label><input id="set-vacuumdate" type="date" value="${s.vacuumAnchorDate}"></div>
+    <div class="field"><label>...who vacuums on that date</label>
+      <select id="set-vacuumperson"><option value="khari" ${s.vacuumAnchorPerson==='khari'?'selected':''}>Khari</option><option value="naila" ${s.vacuumAnchorPerson==='naila'?'selected':''}>Naila</option></select></div>
+    <div class="field"><label>Wash Linens — anchor week (every-other-week)</label>
+      <select id="set-linensonoff"><option value="on" ${s.linensAnchorOnWeek?'selected':''}>This anchor's week IS a wash week</option><option value="off" ${!s.linensAnchorOnWeek?'selected':''}>This anchor's week is NOT a wash week</option></select>
+      <input id="set-linensdate" type="date" value="${s.linensAnchorDate}" style="margin-top:6px"></div>
+  `;
+  document.getElementById('settingsModal').classList.add('show');
+}
+function closeSettingsModal(){ document.getElementById('settingsModal').classList.remove('show'); }
+document.getElementById('settings-cancel').onclick = closeSettingsModal;
+document.getElementById('settings-reset').onclick = ()=>{
+  STATE.settings = Object.assign({}, DEFAULT_SETTINGS);
+  persistSettings();
+  closeSettingsModal();
+  renderApp();
+};
+document.getElementById('settings-save').onclick = ()=>{
+  const dw = document.getElementById('set-dogweek').value;
+  STATE.settings = {
+    dogWeekOverride: dw ? parseInt(dw,10) : null,
+    bathroomAnchorDate: document.getElementById('set-bathdate').value,
+    bathroomAnchorWeek: parseInt(document.getElementById('set-bathweek').value,10),
+    floorAnchorDate: document.getElementById('set-floordate').value,
+    floorAnchorWeek: document.getElementById('set-floorweek').value,
+    curbAnchorDate: document.getElementById('set-curbdate').value,
+    curbAnchorPerson: document.getElementById('set-curbperson').value,
+    blindsAnchorDate: document.getElementById('set-blindsdate').value,
+    blindsAnchorPerson: document.getElementById('set-blindsperson').value,
+    sweepAnchorDate: document.getElementById('set-sweepdate').value,
+    sweepAnchorPerson: document.getElementById('set-sweepperson').value,
+    vacuumAnchorDate: document.getElementById('set-vacuumdate').value,
+    vacuumAnchorPerson: document.getElementById('set-vacuumperson').value,
+    linensAnchorDate: document.getElementById('set-linensdate').value,
+    linensAnchorOnWeek: document.getElementById('set-linensonoff').value==='on'
+  };
+  persistSettings();
+  closeSettingsModal();
+  renderApp();
+};
+
+/* =========================== EXPORT: SHARED HELPERS =========================== */
+function buildPersonWeekLines(personId, weekStartIso){
+  const person = PEOPLE.find(p=>p.id===personId);
+  const lines = [];
+  lines.push(`${person.icon} ${person.name} — Week of ${formatShort(weekStartIso)}`);
+  for(let i=0;i<7;i++){
+    const iso = addDays(weekStartIso, i);
+    const chores = getChoresForDate(personId, iso, STATE.settings, STATE.customEntries);
+    lines.push('');
+    lines.push(formatLong(iso)+':');
+    if(!chores.length){ lines.push('  (none)'); }
+    for(const c of chores){
+      const key = personId+'|'+c.id+'|'+iso;
+      lines.push(`  [${STATE.checks[key]?'x':' '}] ${c.icon} ${c.name}${c.detail?' — '+c.detail:''}`);
+    }
+  }
+  const weekly = getWeeklyPanelItems(personId, weekStartIso, STATE.settings);
+  if(weekly.length){
+    lines.push('');
+    lines.push('This Week (no fixed day):');
+    for(const c of weekly){
+      const key = personId+'|'+c.id+'|W'+weekStartIso;
+      lines.push(`  [${STATE.checks[key]?'x':' '}] ${c.icon} ${c.name}${c.detail?' — '+c.detail:''}`);
+    }
+  }
+  const sc = computeWeeklyScorecard(personId, weekStartIso, STATE.settings, STATE.customEntries, STATE.checks);
+  lines.push('');
+  lines.push(`Scorecard: ${sc.done}/${sc.total} completed (${sc.total?Math.round(100*sc.done/sc.total):0}%)`);
+  return lines;
+}
+
+/* =========================== EXPORT: EMAIL =========================== */
+function openMailto(subject, body){
+  const url = `mailto:melvinclinton1972@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.location.href = url;
+}
+function exportFamilyEmail(){
+  const weekStart = startOfWeek(STATE.activeDate);
+  let all = [];
+  for(const p of PEOPLE){
+    all.push(...buildPersonWeekLines(p.id, weekStart));
+    all.push('');
+    all.push('--------------------------------');
+    all.push('');
+  }
+  openMailto(`Clinton Family Chores — Full Family — Week of ${formatShort(weekStart)}`, all.join('\n'));
+}
+
+/* =========================== EXPORT: PPT =========================== */
+function loadScriptOnce(src){
+  return new Promise((resolve, reject)=>{
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = ()=>resolve(true);
+    s.onerror = ()=>reject(new Error('failed: '+src));
+    document.head.appendChild(s);
+  });
+}
+async function ensurePptxGenJS(){
+  if(window.PptxGenJS) return true;
+  const candidates = [
+    'https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgenjs.bundle.js',
+    'https://unpkg.com/pptxgenjs@3.12.0/dist/pptxgenjs.bundle.js',
+    'https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/dist/pptxgen.bundle.js'
+  ];
+  for(const url of candidates){
+    try{ await loadScriptOnce(url); if(window.PptxGenJS) return true; }catch(e){ /* try next candidate */ }
+  }
+  return false;
+}
+function buildPersonSlide(pptx, personId, weekStartIso){
+  const person = PEOPLE.find(p=>p.id===personId);
+  const lines = buildPersonWeekLines(personId, weekStartIso);
+  const slide = pptx.addSlide();
+  slide.addText(`${person.icon} ${person.name} — Week of ${formatShort(weekStartIso)}`, {x:0.4,y:0.3,w:9.2,h:0.6,fontSize:22,bold:true,color:'2D4F3A'});
+  const bodyText = lines.slice(1).join('\n');
+  slide.addText(bodyText, {x:0.4,y:1.0,w:9.2,h:5.8,fontSize:11,fontFace:'Courier New',color:'27241F',valign:'top'});
+}
+async function exportFamilyPPT(){
+  const ok = await ensurePptxGenJS();
+  if(!ok){ alert('Could not load the PowerPoint export library (no internet connection?). Try the Email export instead, or try again later.'); return; }
+  const weekStart = startOfWeek(STATE.activeDate);
+  const pptx = new window.PptxGenJS();
+  const title = pptx.addSlide();
+  title.addText('🏠 Clinton Family Chore Tracker', {x:0.5,y:2.2,w:9,h:1,fontSize:32,bold:true,align:'center',color:'2D4F3A'});
+  title.addText(`Full Family — Week of ${formatShort(weekStart)}`, {x:0.5,y:3.1,w:9,h:0.6,fontSize:18,align:'center',color:'7A766E'});
+  for(const p of PEOPLE) buildPersonSlide(pptx, p.id, weekStart);
+  pptx.writeFile({fileName:`Clinton-Family-Chores-${weekStart}.pptx`});
+}
+
+/* =========================== BACKUP / RESTORE =========================== */
+function backupData(){
+  const payload = { checks: STATE.checks, customEntries: STATE.customEntries, settings: STATE.settings, exportedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'clinton-chore-tracker-backup.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  showToast('Backup downloaded');
+}
+function restoreData(file){
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    try{
+      const parsed = JSON.parse(e.target.result);
+      if(!parsed || typeof parsed !== 'object') throw new Error('bad file');
+      STATE.checks = parsed.checks || {};
+      STATE.customEntries = Array.isArray(parsed.customEntries) ? parsed.customEntries : [];
+      STATE.settings = Object.assign({}, DEFAULT_SETTINGS, parsed.settings||{});
+      persistChecks(); persistCustom(); persistSettings();
+      renderApp();
+      showToast('Backup restored');
+    }catch(err){ alert('That file could not be read as a chore tracker backup.'); }
+  };
+  reader.readAsText(file);
+}
+
+/* =========================== HEADER ACTIONS =========================== */
+document.getElementById('btnAdd').onclick = ()=> openAddEntryModal(STATE.peopleFilter!=='all' ? STATE.peopleFilter : PEOPLE[0].id);
+document.getElementById('btnEmail').onclick = ()=> exportFamilyEmail();
+document.getElementById('btnPptx').onclick = ()=> exportFamilyPPT();
+document.getElementById('btnSettings').onclick = ()=> openSettingsModal();
+document.getElementById('btnBackup').onclick = ()=> backupData();
+document.getElementById('btnRestore').onclick = ()=> document.getElementById('restoreFile').click();
+document.getElementById('restoreFile').onchange = (e)=>{ if(e.target.files[0]) restoreData(e.target.files[0]); e.target.value=''; };
+
+/* =========================== INIT =========================== */
+renderApp();
+initRemoteSync();
+</script>
+</body>
+</html>
